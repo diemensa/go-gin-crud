@@ -35,6 +35,11 @@ func GetAllBooks(c *gin.Context) {
 
 	if res.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{
+			"Error": "Something's wrong",
+		})
+		return
+	} else if len(books) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{
 			"Error": "Library is empty :(",
 		})
 		return
@@ -49,14 +54,14 @@ func AddBook(c *gin.Context) {
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"Error": "Something's wrong in request body",
+			"Error": "Check the types of what you send",
 		})
 		return
 	}
 
-	if err := validate.Struct(request); err != nil {
+	if err := validate.Struct(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"Error": "Something's wrong in request body",
+			"Error": "Couldn't validate the structure",
 		})
 		return
 	}

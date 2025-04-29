@@ -10,7 +10,8 @@ var DB *gorm.DB
 
 func ConnectToDB() {
 	var err error
-	DB, err = gorm.Open(sqlite.Open("./database/dreambase.db"), &gorm.Config{})
+
+	DB, err = gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 
 	if err != nil {
 		log.Fatal("Failed to connect to DB")
