@@ -10,10 +10,10 @@ func SetupRouters(mode string, db *gorm.DB) *gin.Engine {
 
 	var router *gin.Engine
 	switch {
-	case mode == "test":
+	case mode == "main":
 		gin.SetMode(gin.ReleaseMode)
 		router = gin.Default()
-	case mode == "main":
+	case mode == "test":
 		gin.SetMode(gin.TestMode)
 		router = gin.New()
 		router.Use(gin.Recovery())
