@@ -1,0 +1,28 @@
+package setup
+
+import (
+	"github.com/gin-gonic/gin"
+	"go-gin-crud/controllers"
+	"gorm.io/gorm"
+)
+
+func SetupRouters(mode string, db *gorm.DB) *gin.Engine {
+
+	var router *gin.Engine
+	switch {
+	case mode == "test":
+		gin.SetMode(gin.ReleaseMode)
+		router = gin.Default()
+	case mode == "main":
+		gin.SetMode(gin.TestMode)
+		router = gin.New()
+		router.Use(gin.Recovery())
+
+	}
+
+	router.POST("/book", controllers.AddBook(db))
+	router.GET("/book/:id", controllers.GetBookByID(db))
+	router.GET("/book", controllers.GetAllBooks(db))
+
+	return router
+}

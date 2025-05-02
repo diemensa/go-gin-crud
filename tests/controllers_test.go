@@ -2,38 +2,21 @@ package tests
 
 import (
 	"encoding/json"
-	"github.com/gin-gonic/gin"
-	"github.com/glebarez/sqlite"
-	"go-gin-crud/controllers"
 	"go-gin-crud/models"
-	"gorm.io/gorm"
+	"go-gin-crud/setup"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strings"
 	"testing"
 )
 
-func setupTestRouters() (*gin.Engine, *gorm.DB) {
-
-	gin.SetMode(gin.TestMode)
-
-	router := gin.New()
-	router.Use(gin.Recovery())
-
-	TestDB, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
-	TestDB.AutoMigrate(&models.Book{})
-
-	router.POST("/book", controllers.AddBook(TestDB))
-	router.GET("/book/:id", controllers.GetBookByID(TestDB))
-	router.GET("/book", controllers.GetAllBooks(TestDB))
-
-	return router, TestDB
-}
-
 func TestBookControllers(t *testing.T) {
+	mode := "test"
 
-	router, db := setupTestRouters()
+	db := setup.ConnectToDB(mode)
+	router := setup.SetupRouters(mode, db)
 
 	want := models.Book{
 		Title:  "1984",
@@ -41,19 +24,33 @@ func TestBookControllers(t *testing.T) {
 		Genre:  "Dystopia",
 	}
 
-	w := httptest.NewRecorder()
+	body := `{"title": "1984",
+			  "author": "Orwell",
+			  "genre": "Dystopia"}`
 
 	t.Run("AddBook", func(t *testing.T) {
 
-		create_res := db.Create(&want)
-		if create_res.Error != nil {
-			t.Fatal("Error adding book")
+		w := httptest.NewRecorder()
+		req, err := http.NewRequest("POST", "/book", strings.NewReader(body))
 
+		if err != nil {
+			t.Fatal("Error sending POST request")
+		}
+
+		req.Header.Set("Content-Type", "application/json")
+
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusCreated {
+			t.Fatal("Error adding book")
 		}
 	})
 
 	t.Run("GetBookByID", func(t *testing.T) {
+
 		var got models.Book
+		w := httptest.NewRecorder()
+
 		req, err := http.NewRequest("GET", "/book/1", nil)
 		if err != nil {
 			t.Fatal("Error creating a request")
@@ -90,6 +87,8 @@ func TestBookControllers(t *testing.T) {
 			Author: "Orwell",
 			Genre:  "Dystopia",
 		}}
+
+		w := httptest.NewRecorder()
 
 		req, err := http.NewRequest("GET", "/book", nil)
 		if err != nil {
