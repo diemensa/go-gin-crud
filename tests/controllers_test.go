@@ -3,9 +3,10 @@ package tests
 import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
-	"go-gin-crud/config"
+	"github.com/glebarez/sqlite"
 	"go-gin-crud/controllers"
 	"go-gin-crud/models"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -13,24 +14,27 @@ import (
 	"testing"
 )
 
-func setupTestRouters() *gin.Engine {
+func setupTestRouters() (*gin.Engine, *gorm.DB) {
+
 	gin.SetMode(gin.TestMode)
+
 	router := gin.New()
 	router.Use(gin.Recovery())
 
-	router.POST("/book", controllers.AddBook)
-	router.GET("/book/:id", controllers.GetBookByID)
-	router.GET("/book", controllers.GetAllBooks)
+	TestDB, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	TestDB.AutoMigrate(&models.Book{})
 
-	return router
+	router.POST("/book", controllers.AddBook(TestDB))
+	router.GET("/book/:id", controllers.GetBookByID(TestDB))
+	router.GET("/book", controllers.GetAllBooks(TestDB))
+
+	return router, TestDB
 }
 
 func TestBookControllers(t *testing.T) {
-	config.ConnectToDB()
-	db := config.DB
-	db.AutoMigrate(&models.Book{})
 
-	router := setupTestRouters()
+	router, db := setupTestRouters()
+
 	want := models.Book{
 		Title:  "1984",
 		Author: "Orwell",

@@ -16,9 +16,9 @@ func init() {
 func main() {
 	router := gin.Default()
 
-	router.POST("/book", controllers.AddBook)
-	router.GET("/book/:id", controllers.GetBookByID)
-	router.GET("/book", controllers.GetAllBooks)
+	router.POST("/book", controllers.AddBook(config.DB))
+	router.GET("/book/:id", controllers.GetBookByID(config.DB))
+	router.GET("/book", controllers.GetAllBooks(config.DB))
 
 	router.Run()
 }
