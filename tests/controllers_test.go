@@ -16,7 +16,7 @@ func TestBookControllers(t *testing.T) {
 	mode := "test"
 
 	db := setup.ConnectToDB(mode)
-	router := setup.SetupRouters(mode, db)
+	router := setup.Routers(mode, db)
 
 	want := models.Book{
 		Title:  "1984",
@@ -24,14 +24,14 @@ func TestBookControllers(t *testing.T) {
 		Genre:  "Dystopia",
 	}
 
-	body := `{"title": "1984",
+	bodyPost := `{"title": "1984",
 			  "author": "Orwell",
 			  "genre": "Dystopia"}`
 
 	t.Run("AddBook", func(t *testing.T) {
 
 		w := httptest.NewRecorder()
-		req, err := http.NewRequest("POST", "/book", strings.NewReader(body))
+		req, err := http.NewRequest("POST", "/book", strings.NewReader(bodyPost))
 
 		if err != nil {
 			t.Fatal("Error sending POST request")
@@ -79,13 +79,39 @@ func TestBookControllers(t *testing.T) {
 		}
 	})
 
+	bodyPut := `{"title": "1984",
+			  "author": "Rizzler",
+			  "genre": "Gyatt"}`
+
+	t.Run("UpdateBook", func(t *testing.T) {
+		w := httptest.NewRecorder()
+
+		req, err := http.NewRequest("PUT", "/book/1", strings.NewReader(bodyPut))
+		if err != nil {
+			t.Fatal("Error creating a request")
+		}
+
+		req.Header.Set("Content-Type", "application/json")
+
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf("Expected status 204, got %v", w.Result())
+		}
+
+		if w.Code != http.StatusCreated {
+			t.Fatal("Error updating book")
+		}
+
+	})
+
 	t.Run("GetAllBooks", func(t *testing.T) {
 		var got []models.Book
 		want := []models.Book{{
 			ID:     1,
 			Title:  "1984",
-			Author: "Orwell",
-			Genre:  "Dystopia",
+			Author: "Rizzler",
+			Genre:  "Gyatt",
 		}}
 
 		w := httptest.NewRecorder()

@@ -11,7 +11,7 @@ func main() {
 	mode := "main"
 
 	db := setup.ConnectToDB(mode)
-	router := setup.SetupRouters(mode, db)
+	router := setup.Routers(mode, db)
 
 	router.Run()
 }

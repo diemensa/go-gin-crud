@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func SetupRouters(mode string, db *gorm.DB) *gin.Engine {
+func Routers(mode string, db *gorm.DB) *gin.Engine {
 
 	var router *gin.Engine
 	switch {
