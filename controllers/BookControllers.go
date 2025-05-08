@@ -108,7 +108,7 @@ func UpdateBook(db *gorm.DB) func(*gin.Context) {
 
 		if err := c.ShouldBindJSON(&request); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"Error": err.Error(),
+				"Error": "Couldn't bind JSON to the struct",
 			})
 			return
 		}
@@ -132,5 +132,28 @@ func UpdateBook(db *gorm.DB) func(*gin.Context) {
 
 		c.Status(http.StatusNoContent)
 
+	}
+}
+
+func DeleteBook(db *gorm.DB) func(*gin.Context) {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		var existing models.Book
+
+		if err := db.First(&existing, id).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"Error": "Book with this ID doesn't exist",
+			})
+			return
+		}
+
+		if err := db.Delete(&existing).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"Error": err.Error(),
+			})
+			return
+		}
+
+		c.Status(http.StatusNoContent)
 	}
 }

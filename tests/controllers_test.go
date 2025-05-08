@@ -133,4 +133,20 @@ func TestBookControllers(t *testing.T) {
 		}
 	})
 
+	t.Run("DeleteBook", func(t *testing.T) {
+
+		w := httptest.NewRecorder()
+
+		req, err := http.NewRequest("DELETE", "/book/1", nil)
+		if err != nil {
+			t.Fatal("Error creating a request")
+		}
+
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusNoContent {
+			t.Fatalf("Expected status 200, got %v", w.Result())
+		}
+	})
+
 }
