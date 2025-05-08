@@ -20,6 +20,7 @@ func Routers(mode string, db *gorm.DB) *gin.Engine {
 	}
 
 	router.POST("/book", controllers.AddBook(db))
+	router.PUT("/book/:id", controllers.UpdateBook(db))
 	router.GET("/book/:id", controllers.GetBookByID(db))
 	router.GET("/book", controllers.GetAllBooks(db))
 

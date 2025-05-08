@@ -95,12 +95,8 @@ func TestBookControllers(t *testing.T) {
 
 		router.ServeHTTP(w, req)
 
-		if w.Code != http.StatusOK {
+		if w.Code != http.StatusNoContent {
 			t.Fatalf("Expected status 204, got %v", w.Result())
-		}
-
-		if w.Code != http.StatusCreated {
-			t.Fatal("Error updating book")
 		}
 
 	})

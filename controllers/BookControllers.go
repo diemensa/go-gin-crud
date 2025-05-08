@@ -90,3 +90,47 @@ func AddBook(db *gorm.DB) func(*gin.Context) {
 		})
 	}
 }
+
+func UpdateBook(db *gorm.DB) func(*gin.Context) {
+	return func(c *gin.Context) {
+
+		var request models.Book
+		var existing models.Book
+
+		id := c.Param("id")
+
+		if err := db.First(&existing, id).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"Error": "Book with this ID doesn't exist",
+			})
+			return
+		}
+
+		if err := c.ShouldBindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"Error": err.Error(),
+			})
+			return
+		}
+
+		if err := validate.Struct(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"Error": "Couldn't validate the structure",
+			})
+			return
+		}
+
+		existing.Title = request.Title
+		existing.Author = request.Author
+		existing.Genre = request.Genre
+
+		if err := db.Save(&existing).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"Error": "Couldn't update the row in database",
+			})
+		}
+
+		c.Status(http.StatusNoContent)
+
+	}
+}
