@@ -10,14 +10,13 @@ func SetupRouters(mode string, db *gorm.DB) *gin.Engine {
 
 	var router *gin.Engine
 	switch {
-	case mode == "main":
-		gin.SetMode(gin.ReleaseMode)
-		router = gin.Default()
 	case mode == "test":
 		gin.SetMode(gin.TestMode)
 		router = gin.New()
 		router.Use(gin.Recovery())
-
+	default:
+		gin.SetMode(gin.ReleaseMode)
+		router = gin.Default()
 	}
 
 	router.POST("/book", controllers.AddBook(db))

@@ -12,10 +12,10 @@ func ConnectToDB(mode string) *gorm.DB {
 	var err error
 
 	switch {
-	case mode == "main":
-		db, err = gorm.Open(sqlite.Open("dreambase.db"), &gorm.Config{})
 	case mode == "test":
 		db, err = gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	default:
+		db, err = gorm.Open(sqlite.Open("dreambase.db"), &gorm.Config{})
 	}
 
 	if err != nil {
